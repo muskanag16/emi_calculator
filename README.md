@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Advanced EMI Calculator & Loan Planner
 
-## Getting Started
+A feature-rich, highly interactive EMI calculator built with modern React and Next.js. This application goes beyond simple monthly payment calculations by offering a prepayment planner, side-by-side scenario comparisons, a sensitivity grid, and seamless real-time cross-tab synchronization.
 
-First, run the development server:
+## 🚀 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 1. Core EMI Engine
+- Calculates Monthly EMI, Total Interest Payable, and Total Amount Payable using the standard reducing-balance formula.
+- Visual Interest-to-Principal ratio progress bar.
+- Synced input fields and sliders for Amount, Rate, and Tenure.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Month-by-Month Amortization Schedule
+- Detailed breakdown of each payment (Principal vs. Interest).
+- Highlights the **Break-even month** (where principal paid exceeds interest).
+- **Chart Mode:** Visual stacked bar chart of the repayment schedule.
+- Paginated data table for optimal performance.
+- Export schedule directly to **CSV**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Prepayment Planner
+- Schedule one-time lump-sum prepayments at specific months.
+- Instantly calculates exactly how much **Interest is Saved** and how much the **Tenure is Reduced**.
+- Adjusted amortization schedule reflecting the prepayments.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Scenario Comparison
+- Compare up to 3 different loan configurations (Amount, Rate, Tenure) side-by-side.
+- Automatically highlights the scenario with the lowest total financial cost.
+- Edits made in comparison mode seamlessly sync back to the main calculator.
 
-## Learn More
+### 5. What-If Sensitivity Grid
+- A 7x7 analytical matrix showing how the EMI shifts across varying interest rates (±1%, ±2%, ±3%) and tenures (±6, ±12, ±24 months).
+- Strict bounds clamping and deduplication for a clean UI.
 
-To learn more about Next.js, take a look at the following resources:
+### 6. Real-Time Cross-Tab Sync (No Backend Required)
+- Uses the native browser **`BroadcastChannel` API** to sync the calculator state, scenarios, prepayments, and themes across multiple open tabs in real-time.
+- **Tab Identity & Presence:** Tracks and displays how many tabs are currently open in the workspace.
+- **Tab Leadership (Bonus):** Features a leader-election system. New tabs instantly request the current working state from the "Leader" tab, ensuring a flawless user experience without relying on local storage event hacks.
+- **Dark/Light Mode Sync:** Toggling the theme in one tab instantly switches the theme across all active tabs.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Framework:** Next.js 14 (App Router)
+- **Library:** React 18
+- **Styling:** Tailwind CSS
+- **Language:** TypeScript
+- **Charting:** Recharts
+- **State Management:** React Context API + Custom Broadcast Hooks
 
-## Deploy on Vercel
+## 💻 Running Locally
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+To run this project on your local machine, follow these steps:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/YourUsername/advanced-emi-calculator.git](https://github.com/YourUsername/advanced-emi-calculator.git)
