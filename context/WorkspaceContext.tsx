@@ -34,14 +34,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
   
   const broadcastTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const skipBroadcastRef = useRef(false); // ✅ Purely tracks if change came from network or user drag
+  const skipBroadcastRef = useRef(false);
 
   // 1. Initial Load from LocalStorage
   useEffect(() => {
     const savedData = localStorage.getItem("emi-calculator-state");
     if (savedData) {
       try {
-        setLocalState(JSON.parse(savedData));
+        // Purane aur naye state ko merge karo taaki koi property miss na ho
+        setLocalState((prev) => ({ ...prev, ...JSON.parse(savedData) }));
       } catch (e) {
         console.error("Failed to parse state", e);
       }
@@ -49,32 +50,30 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     setIsLoaded(true);
   }, []);
 
-  // 2. Specialized safe state updater for incoming network broadcasts
+  // 2. Safe updater for incoming network broadcasts
   const updateStateFromBroadcast = useCallback((newState: LoanState) => {
-    skipBroadcastRef.current = true;
+    skipBroadcastRef.current = true; // Mark that this update came from network
     setLocalState(newState);
   }, []);
 
   // Attach Broadcast Sync hook
   const { tabId, activeTabsCount, isLeader, broadcastState, broadcastUndo } = useBroadcastSync(
     localState,
-    updateStateFromBroadcast // ✅ Passing safe network handler
+    updateStateFromBroadcast
   );
 
-  // 3. Centralized Clean Side-Effect Loop (Solves Vercel Loop Bug Completely)
+  // 3. Centralized Side-Effect Loop
   useEffect(() => {
     if (!isLoaded) return;
 
-    // A. Debounced LocalStorage Sync
-    const saveTimer = setTimeout(() => {
-      localStorage.setItem("emi-calculator-state", JSON.stringify(localState));
-    }, 300);
+    // ✅ FIX: Save to LocalStorage IMMEDIATELY (No Delay)
+    // Ab refresh karne par data hamesha latest wala hi dikhega
+    localStorage.setItem("emi-calculator-state", JSON.stringify(localState));
 
-    // B. Debounced Cross-Tab Broadcast
+    // Debounced Cross-Tab Broadcast (Only network calls are delayed)
     if (skipBroadcastRef.current) {
-      skipBroadcastRef.current = false; // Change was from network, reset flag and skip rebroadcasting
+      skipBroadcastRef.current = false; 
     } else {
-      // Local change from dragging slider, safely trigger debounce broadcast
       if (broadcastTimerRef.current) clearTimeout(broadcastTimerRef.current);
       broadcastTimerRef.current = setTimeout(() => {
         broadcastState(localState);
@@ -82,17 +81,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
 
     return () => {
-      clearTimeout(saveTimer);
       if (broadcastTimerRef.current) clearTimeout(broadcastTimerRef.current);
     };
   }, [localState, isLoaded, broadcastState]);
 
-  // Pure setState function without any inline side-effects
   const setState = useCallback((value: React.SetStateAction<LoanState>) => {
     setLocalState(value);
   }, []);
 
-  // Global Ctrl+Z (Undo) Listener
+  // Global Undo Setup
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {

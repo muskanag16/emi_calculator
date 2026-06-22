@@ -1,13 +1,21 @@
 
 
-"use client";
-
 import { useState, useMemo } from "react";
 import { v4 as uuid } from "uuid";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { calculateTotals } from "@/utils/emi";
 import { generatePrepaymentSchedule } from "@/utils/prepayment";
 import { exportCSV } from "@/utils/exportCsv";
+import dynamic from "next/dynamic";
+
+
+const AmortizationChart = dynamic(
+  () => import("@/components/AmortizationChart"),
+  { 
+    ssr: false, 
+    loading: () => <div className="p-6 text-center text-gray-500 font-medium">Loading Chart...</div> 
+  }
+);
 
 const formatCurrency = (amount: number) => {
   return `₹${amount.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
@@ -212,7 +220,6 @@ export default function PrepaymentPlanner() {
                   ) : (
                     paginatedRows.map((row: any) => {
                       const isBreakEven = row.month === breakEvenMonth;
-                      // ✅ FIX: `row.prepayment` ko check kar rahe hain jo already summed up value hold karta hai
                       const hasPrepayment = row.prepayment > 0;
 
                       return (
@@ -241,7 +248,6 @@ export default function PrepaymentPlanner() {
                           <td className={`py-3.5 px-6 text-right font-medium ${isDark ? "text-orange-400" : "text-orange-400"}`}>
                             {formatCurrency(row.interestPaid || 0)}
                           </td>
-                          {/* ✅ FIX: Yahan map logic hata kar direct `row.prepayment` ka use kiya hai */}
                           <td className={`py-3.5 px-6 text-center font-medium ${hasPrepayment ? (isDark ? "text-gray-200" : "text-gray-800") : "text-gray-400"}`}>
                             {hasPrepayment ? formatCurrency(row.prepayment) : "—"}
                           </td>
@@ -274,7 +280,8 @@ export default function PrepaymentPlanner() {
             </div>
           </>
         ) : (
-          <div className="p-6 text-center text-gray-500">Chart View</div>
+          /* ✅ FIX 2: Placeholder text hata kar actual Chart Component render kiya */
+          <AmortizationChart data={scheduleRows} isDark={isDark} />
         )}
       </div>
 
